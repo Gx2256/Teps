@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>التبس الشهري</title>
@@ -608,7 +609,7 @@
 
           <div class="stat-box">
             <label>تبسك الشهري (المبلغ اللي هيقبضه)</label>
-            <input type="number" id="monthly-salary-input" class="form-input" placeholder="0" style="font-size:18px;font-weight:800;color:var(--emerald);" readonly />
+            <input type="number" id="monthly-salary-input" class="form-input" placeholder="0" style="font-size:18px;font-weight:800;color:var(--emerald);" />
           </div>
 
           <div class="stat-box">
@@ -661,15 +662,15 @@
       </div>
       <div class="form-group">
         <label>اسم المستخدم للدخول (User Name)</label>
-        <input type="text" id="new-username" class="form-input" placeholder="مثال: ragab_1" autocomplete="off" />
+        <input type="text" id="new-username" class="form-input" placeholder="مثال: ragab_1" />
       </div>
       <div class="form-group">
         <label>كلمة المرور (Password)</label>
-        <input type="text" id="new-password" class="form-input" placeholder="كلمة المرور" autocomplete="off" />
+        <input type="text" id="new-password" class="form-input" placeholder="كلمة المرور" />
       </div>
       <div class="modal-actions">
         <button class="btn" style="flex:1;" onclick="createUser()">حفظ الحساب</button>
-        <button class="btn btn-outline" style="flex:1;" onclick="closeModals()">إغلاق</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModals()">إلغاء</button>
       </div>
     </div>
   </div>
@@ -700,15 +701,35 @@
       "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
       "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
     ];
+// ⚙️ رابط السيرفر والجدول السحابي
+    const SUPABASE_URL = "https://npcyipoklvhrvvwehoeh.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wY3lpcG9rbHZhrnZ3ZWhvZWgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMTg5MzA5OCwiZXhwIjoyMDQ3NDY5MDk4fQ.dummy_key_placeholder";
 
-    let appData = JSON.parse(localStorage.getItem("monthly_tips_ledger_v2")) || {
-      users: [],
-      advances: {},
-      salaries: {},
-      adminTips: {}
-    };
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function saveData() {
+    let appData = { users: [], advances: {}, salaries: {}, adminTips: {} };
+
+    // دالة تحميل البيانات من سوبابيس أونلاين
+    async function loadDataFromCloud() {
+      try {
+        const { data, error } = await supabaseClient.from('app_store').select('data').eq('id', 'main').single();
+        if (data && data.data) {
+          appData = data.data;
+        }
+      } catch (e) {
+        console.error("خطأ في الاتصال بقاعدة البيانات", e);
+      }
+    }
+
+    // دالة حفظ البيانات على السيرفر لحظياً
+    async function saveData() {
+      try {
+        await supabaseClient.from('app_store').update({ data: appData }).eq('id', 'main');
+      } catch (e) {
+        console.error("خطأ في حفظ البيانات", e);
+      }
+    }
+     {
       localStorage.setItem("monthly_tips_ledger_v2", JSON.stringify(appData));
     }
 
@@ -731,7 +752,7 @@
     let selectedUserId = null;
     let editingPassUserId = null;
 
-    // فحص الجلسة المحفوظة مسبقاً وتحديث بيانات المستخدم ديناميكياً
+    // التحقق المباشر من الجلسة المحفوظة مسبقاً لمنع ظهور شاشة تسجيل الدخول كل مرة
     window.addEventListener("DOMContentLoaded", () => {
       const savedSession = localStorage.getItem("monthly_tips_session");
       if (savedSession) {
@@ -799,8 +820,7 @@
         return;
       }
 
-      // مطابقة بيانات الموظف بدقة تامة وبدون أي مشاكل في المسافات أو الحروف
-      const foundUser = appData.users.find(x => String(x.username).trim() === u && String(x.password).trim() === p);
+      const foundUser = appData.users.find(x => x.username === u && x.password === p);
       if (foundUser) {
         errEl.style.display = "none";
         triggerLoginSuccess({ role: "user", ...foundUser }, true);
@@ -814,6 +834,7 @@
       currentUser = userObj;
       currentPeriod = getInitialPeriod();
       
+      // حفظ الجلسة تلقائياً في المتصفح
       localStorage.setItem("monthly_tips_session", JSON.stringify(userObj));
 
       const loginScreen = document.getElementById("login-screen");
@@ -838,7 +859,7 @@
     function logout() {
       currentUser = null;
       selectedUserId = null;
-      localStorage.removeItem("monthly_tips_session");
+      localStorage.removeItem("monthly_tips_session"); // مسح الجلسة عند الخروج
       document.getElementById("login-user").value = "";
       document.getElementById("login-pass").value = "";
       document.getElementById("app-screen").classList.add("hidden");
@@ -900,6 +921,7 @@
       }
 
       appData.users.forEach(u => {
+        const initial = (u.displayName || u.username).charAt(0).toUpperCase();
         const card = document.createElement("div");
         card.className = "user-card";
         card.innerHTML = `
@@ -935,7 +957,7 @@
           if (targetIdx !== null && targetIdx >= 0 && targetIdx < inputs.length) {
             e.preventDefault();
             inputs[targetIdx].focus();
-            if (inputs[targetIdx].select) inputs[targetIdx].select();
+            inputs[targetIdx].select();
           }
         });
       });
@@ -943,12 +965,7 @@
 
     function openUserLedger(userId) {
       selectedUserId = userId;
-      // تحديث بيانات المستخدم المتاح نشطاً في الجلسة لو المدير عمل تعديل
-      if (currentUser.role === "user") {
-        selectedUserId = currentUser.id;
-      }
-
-      const user = appData.users.find(u => u.id === selectedUserId);
+      const user = appData.users.find(u => u.id === userId);
       if (!user) return;
 
       document.getElementById("admin-home-view").classList.add("hidden");
