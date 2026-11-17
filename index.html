@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>التبس الشهري</title>
+  <link rel="icon" href="logo.jpeg" type="image/jpeg">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #090d0c;
+      --bg-card: #111816;
+      --bg-input: #16201d;
+      --border: #1f2e29;
+      --emerald: #10b981;
+      --emerald-dark: #059669;
+      --emerald-glow: rgba(16, 185, 129, 0.15);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* شاشة الدخول والأنيميشن */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: radial-gradient(circle at top, #0f2922 0%, var(--bg-main) 70%);
+    }
+
+    .login-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+    }
+
+    .login-success-anim {
+      transform: scale(1.12) translateY(-20px);
+      opacity: 0;
+    }
+
+    .logo-badge {
+      width: 64px;
+      height: 64px;
+      background: var(--emerald-glow);
+      border: 1px solid var(--emerald);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      overflow: hidden;
+    }
+
+    .logo-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .login-box h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .login-box p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      text-align: right;
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--emerald);
+      box-shadow: 0 0 0 3px var(--emerald-glow);
+    }
+
+    .btn {
+      background: var(--emerald);
+      color: #04130e;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--emerald-dark);
+      color: #fff;
+    }
+
+    .btn-full { width: 100%; }
+
+    .btn-outline {
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--emerald);
+      background: var(--emerald-glow);
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    header {
+      background: rgba(17, 24, 22, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h2 {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-title span {
+      font-size: 12px;
+      color: var(--emerald);
+    }
+
+    .container {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    .instapay-card {
+      background: linear-gradient(135deg, #10241e 0%, var(--bg-card) 100%);
+      border: 1px solid var(--emerald);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.08);
+    }
+
+    .instapay-info h3 {
+      color: var(--emerald);
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instapay-info p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .instapay-amount {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--emerald);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .user-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      transition: transform 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .user-card:hover {
+      border-color: var(--emerald);
+      transform: translateY(-2px);
+    }
+
+    .user-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--emerald-glow);
+      border: 1px solid var(--emerald);
+      color: var(--emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      overflow: hidden;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-meta {
+      flex: 1;
+      margin-right: 12px;
+    }
+
+    .user-meta h4 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .user-meta span {
+      font-size: 12px;
+      color: var(--text-muted);
+      direction: ltr;
+      display: inline-block;
+    }
+
+    .user-card-actions {
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    .user-card-actions button {
+      flex: 1;
+      padding: 8px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    .period-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .period-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .period-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--emerald);
+    }
+
+    .ledger-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .day-cell {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 6px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .day-cell:focus-within {
+      border-color: var(--emerald);
+      background: #14221e;
+    }
+
+    .day-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+
+    .day-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-top: 1px dashed var(--border);
+      color: var(--text-main);
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      padding-top: 6px;
+      outline: none;
+    }
+
+    .summary-boxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .stat-box.danger-alert {
+      background: var(--danger-bg);
+      border-color: var(--danger);
+    }
+
+    .stat-box label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--emerald);
+    }
+
+    .stat-box.danger-alert .stat-val {
+      color: var(--danger);
+    }
+
+    .alert-banner {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .modal-box h3 {
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .ledger-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      header {
+        padding: 12px 14px;
+      }
+      .header-title h2 { font-size: 16px; }
+      .ledger-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .day-cell {
+        padding: 6px 4px;
+      }
+      .day-label { font-size: 10px; }
+      .day-input { font-size: 14px; }
+      .instapay-amount { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="login-screen">
+    <div class="login-box" id="login-card">
+      <div class="logo-badge">
+        <img src="logo.jpeg" alt="Logo">
+      </div>
+      <h1>التبس الشهري</h1>
+      <p>سجل الدخول للمتابعة</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label>اسم المستخدم (User Name)</label>
+          <input type="text" id="login-user" class="form-input" placeholder="أدخل اسم المستخدم" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور (Password)</label>
+          <input type="password" id="login-pass" class="form-input" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn btn-full">تسجيل الدخول</button>
+        <div class="error-msg" id="login-error">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-screen" class="hidden">
+    <header>
+      <div class="header-right">
+        <div class="logo-badge" style="width:40px;height:40px;margin:0;">
+          <img src="logo.jpeg" alt="Logo">
+        </div>
+        <div class="header-title">
+          <h2>التبس الشهري</h2>
+          <span id="current-role-label">الحساب الأساسي المتحكم</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="back-home-btn" class="btn btn-outline hidden" onclick="goHome()">الرجوع للصفحة الرئيسية &lt;</button>
+        <button class="btn btn-outline" onclick="logout()">خروج</button>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div id="admin-home-view" class="hidden">
+        <div class="instapay-card">
+          <div class="instapay-info">
+            <h3>💳 Instapay — المبلغ الحالي</h3>
+            <p id="instapay-period-desc">صافي التبس الشهري بعد خصم جميع السلف للفترة الحالية</p>
+          </div>
+          <div class="instapay-amount" id="instapay-net-display">0 ج.م</div>
+        </div>
+
+        <div class="toolbar">
+          <div>
+            <h3 style="font-size:18px;">حسابات المستخدمين</h3>
+            <p style="font-size:12px;color:var(--text-muted);">اختر مستخدم لعرض أو تعديل السلف والقبض</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-outline" onclick="openMonthlyTipsView()">📊 جدول التبس الشهري</button>
+            <button class="btn" onclick="openCreateUserModal()">+ حساب جديد</button>
+          </div>
+        </div>
+
+        <div class="users-grid" id="users-grid"></div>
+      </div>
+
+      <div id="user-ledger-view" class="hidden">
+        <div class="period-bar">
+          <div>
+            <h3 id="ledger-user-title" style="font-size:17px;">السلف الشهرية</h3>
+            <span id="ledger-period-range" style="font-size:12px;color:var(--text-muted);"></span>
+          </div>
+          <div class="period-controls">
+            <button class="btn btn-outline" style="padding:6px 12px;" onclick="changePeriod(-1)">&lt;</button>
+            <span class="period-title" id="ledger-period-name"></span>
+            <button class="btn btn-outline" style="padding:6px 12px;" onclick="changePeriod(1)">&gt;</button>
+          </div>
+        </div>
+
+        <div class="alert-banner" id="max-limit-alert">
+          ⚠️ إنذار: تم استلاف الحد الأقصى (تجاوزت السلف 1000 ج.م)!
+        </div>
+
+        <div class="ledger-grid" id="advances-grid"></div>
+
+        <div class="summary-boxes">
+          <div class="stat-box" id="total-advances-box">
+            <label>إجمالي السلف</label>
+            <div class="stat-val" id="total-advances-val">0 ج.م</div>
+          </div>
+
+          <div class="stat-box">
+            <label>تبسك الشهري (المبلغ اللي هيقبضه)</label>
+            <input type="number" id="monthly-salary-input" class="form-input" placeholder="0" style="font-size:18px;font-weight:800;color:var(--emerald);" />
+          </div>
+
+          <div class="stat-box">
+            <label>الصافي بعد السلف (تبسك الشهري - إجمالي السلف)</label>
+            <div class="stat-val" id="net-payout-val">0 ج.م</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="monthly-tips-view" class="hidden">
+        <div class="period-bar">
+          <div>
+            <h3 style="font-size:17px;color:var(--emerald);">جدول التبس الشهري (خاص بالمدير)</h3>
+            <span id="tips-period-range" style="font-size:12px;color:var(--text-muted);"></span>
+          </div>
+          <div class="period-controls">
+            <button class="btn btn-outline" style="padding:6px 12px;" onclick="changePeriod(-1)">&lt;</button>
+            <span class="period-title" id="tips-period-name"></span>
+            <button class="btn btn-outline" style="padding:6px 12px;" onclick="changePeriod(1)">&gt;</button>
+          </div>
+        </div>
+
+        <div class="ledger-grid" id="tips-grid"></div>
+
+        <div class="summary-boxes">
+          <div class="stat-box">
+            <label>إجمالي التبس الشهري (لهذا الشهر)</label>
+            <div class="stat-val" id="total-tips-val">0 ج.م</div>
+          </div>
+          <div class="stat-box">
+            <label>إجمالي سلف كل المستخدمين (لهذا الشهر)</label>
+            <div class="stat-val" style="color:#f59e0b;" id="all-users-advances-val">0 ج.م</div>
+          </div>
+          <div class="stat-box">
+            <label>صافي المبلغ الحالي (Instapay)</label>
+            <div class="stat-val" id="tips-net-remaining-val">0 ج.م</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="create-user-modal">
+    <div class="modal-box">
+      <h3>إنشاء حساب مستخدم جديد</h3>
+      <div class="form-group">
+        <label>الاسم المعروض (مثلاً: Ragab)</label>
+        <input type="text" id="new-display-name" class="form-input" placeholder="اسم الموظف" />
+      </div>
+      <div class="form-group">
+        <label>اسم المستخدم للدخول (User Name)</label>
+        <input type="text" id="new-username" class="form-input" placeholder="مثال: ragab_1" />
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور (Password)</label>
+        <input type="text" id="new-password" class="form-input" placeholder="كلمة المرور" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn" style="flex:1;" onclick="createUser()">حفظ الحساب</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModals()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="password-modal">
+    <div class="modal-box">
+      <h3 id="pass-modal-title">كلمة مرور المستخدم</h3>
+      <div class="form-group">
+        <label>اسم المستخدم</label>
+        <input type="text" id="edit-username-display" class="form-input" disabled />
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور الحالية (يمكنك تعديلها)</label>
+        <input type="text" id="edit-password-input" class="form-input" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn" style="flex:1;" onclick="saveUpdatedPassword()">تحديث كلمة المرور</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModals()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_USER = "mostafa_ragab_10";
+    const ADMIN_PASS = "mrmr25306";
+
+    const ARABIC_MONTHS = [
+      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+    ];
+
+    let appData = JSON.parse(localStorage.getItem("monthly_tips_ledger_v2")) || {
+      users: [],
+      advances: {},
+      salaries: {},
+      adminTips: {}
+    };
+
+    function saveData() {
+      localStorage.setItem("monthly_tips_ledger_v2", JSON.stringify(appData));
+    }
+
+    function getInitialPeriod() {
+      const now = new Date();
+      let year = now.getFullYear();
+      let month = now.getMonth();
+      if (now.getDate() < 16) {
+        month -= 1;
+        if (month < 0) {
+          month = 11;
+          year -= 1;
+        }
+      }
+      return { year, month };
+    }
+
+    let currentPeriod = getInitialPeriod();
+    let currentUser = null;
+    let selectedUserId = null;
+    let editingPassUserId = null;
+
+    function getPeriodKey(p = currentPeriod) {
+      return `${p.year}-${String(p.month + 1).padStart(2, '0')}`;
+    }
+
+    function getPeriodDays(p = currentPeriod) {
+      const days = [];
+      const startDate = new Date(p.year, p.month, 16);
+      const endDate = new Date(p.year, p.month + 1, 15);
+      let cursor = new Date(startDate);
+
+      while (cursor <= endDate) {
+        const y = cursor.getFullYear();
+        const m = cursor.getMonth();
+        const d = cursor.getDate();
+        days.push({
+          key: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+          label: `${d} ${ARABIC_MONTHS[m]}`
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      return days;
+    }
+
+    function getPeriodLabels(p = currentPeriod) {
+      const nextMonth = (p.month + 1) % 12;
+      const nextYear = p.month === 11 ? p.year + 1 : p.year;
+      return {
+        title: `${ARABIC_MONTHS[p.month]} ${p.year}`,
+        range: `16 ${ARABIC_MONTHS[p.month]} — 15 ${ARABIC_MONTHS[nextMonth]} ${nextYear}`
+      };
+    }
+
+    document.getElementById("login-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const u = document.getElementById("login-user").value.trim();
+      const p = document.getElementById("login-pass").value.trim();
+      const errEl = document.getElementById("login-error");
+
+      if (u === ADMIN_USER && p === ADMIN_PASS) {
+        errEl.style.display = "none";
+        triggerLoginSuccess({ role: "admin" });
+        return;
+      }
+
+      const foundUser = appData.users.find(x => x.username === u && x.password === p);
+      if (foundUser) {
+        errEl.style.display = "none";
+        triggerLoginSuccess({ role: "user", ...foundUser });
+        return;
+      }
+
+      errEl.style.display = "block";
+    });
+
+    function triggerLoginSuccess(userObj) {
+      currentUser = userObj;
+      currentPeriod = getInitialPeriod();
+      const card = document.getElementById("login-card");
+      card.classList.add("login-success-anim");
+
+      setTimeout(() => {
+        document.getElementById("login-screen").classList.add("hidden");
+        card.classList.remove("login-success-anim");
+        document.getElementById("app-screen").classList.remove("hidden");
+        initAppScreen();
+      }, 450);
+    }
+
+    function logout() {
+      currentUser = null;
+      selectedUserId = null;
+      document.getElementById("login-user").value = "";
+      document.getElementById("login-pass").value = "";
+      document.getElementById("app-screen").classList.add("hidden");
+      document.getElementById("login-screen").classList.remove("hidden");
+    }
+
+    function initAppScreen() {
+      if (currentUser.role === "admin") {
+        document.getElementById("current-role-label").textContent = "الحساب الأساسي المتحكم";
+        goHome();
+      } else {
+        document.getElementById("current-role-label").textContent = `مرحباً، ${currentUser.displayName}`;
+        document.getElementById("back-home-btn").classList.add("hidden");
+        openUserLedger(currentUser.id);
+      }
+    }
+
+    function goHome() {
+      if (currentUser.role !== "admin") return;
+      selectedUserId = null;
+      document.getElementById("back-home-btn").classList.add("hidden");
+      document.getElementById("user-ledger-view").classList.add("hidden");
+      document.getElementById("monthly-tips-view").classList.add("hidden");
+      document.getElementById("admin-home-view").classList.remove("hidden");
+      renderAdminHome();
+    }
+
+    function calculateCurrentMonthTotals() {
+      const pKey = getPeriodKey();
+      const tipsMap = appData.adminTips[pKey] || {};
+      const totalTips = Object.values(tipsMap).reduce((sum, v) => sum + (Number(v) || 0), 0);
+
+      let totalAllUsersAdvances = 0;
+      appData.users.forEach(u => {
+        const uAdvMap = appData.advances[`${u.id}_${pKey}`] || {};
+        totalAllUsersAdvances += Object.values(uAdvMap).reduce((sum, v) => sum + (Number(v) || 0), 0);
+      });
+
+      return {
+        totalTips,
+        totalAllUsersAdvances,
+        netInstapay: totalTips - totalAllUsersAdvances
+      };
+    }
+
+    function renderAdminHome() {
+      const { totalTips, totalAllUsersAdvances, netInstapay } = calculateCurrentMonthTotals();
+      const labels = getPeriodLabels();
+      document.getElementById("instapay-period-desc").textContent =
+        `فترة (${labels.range}) | التبس: ${totalTips} ج.م - السلف: ${totalAllUsersAdvances} ج.م`;
+      document.getElementById("instapay-net-display").textContent = `${netInstapay} ج.م`;
+
+      const grid = document.getElementById("users-grid");
+      grid.innerHTML = "";
+
+      if (appData.users.length === 0) {
+        grid.innerHTML = `<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px;">لا يوجد حسابات مستخدمين بعد. اضغط على "+ حساب جديد" لإضافة مستخدم.</p>`;
+        return;
+      }
+
+      appData.users.forEach(u => {
+        const initial = (u.displayName || u.username).charAt(0).toUpperCase();
+        const card = document.createElement("div");
+        card.className = "user-card";
+        card.innerHTML = `
+          <div class="user-card-top" onclick="openUserLedger('${u.id}')">
+            <div class="user-avatar"><img src="logo.jpeg" alt="Logo"></div>
+            <div class="user-meta">
+              <h4>${u.displayName}</h4>
+              <span>@${u.username}</span>
+            </div>
+            <span style="color:var(--emerald);font-weight:700;">&lt;</span>
+          </div>
+          <div class="user-card-actions">
+            <button class="btn btn-outline" onclick="openPasswordModal('${u.id}')">🔑 كلمة المرور</button>
+            <button class="btn btn-danger" onclick="deleteUser('${u.id}')">🗑️ حذف الحساب</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function attachGridArrowNavigation(containerId) {
+      const inputs = Array.from(document.querySelectorAll(`#${containerId} input`));
+      const cols = window.innerWidth <= 520 ? 3 : (window.innerWidth <= 900 ? 5 : 10);
+
+      inputs.forEach((inp, idx) => {
+        inp.addEventListener("keydown", (e) => {
+          let targetIdx = null;
+          if (e.key === "ArrowLeft") targetIdx = idx + 1;
+          else if (e.key === "ArrowRight") targetIdx = idx - 1;
+          else if (e.key === "ArrowDown") targetIdx = idx + cols;
+          else if (e.key === "ArrowUp") targetIdx = idx - cols;
+
+          if (targetIdx !== null && targetIdx >= 0 && targetIdx < inputs.length) {
+            e.preventDefault();
+            inputs[targetIdx].focus();
+            inputs[targetIdx].select();
+          }
+        });
+      });
+    }
+
+    function openUserLedger(userId) {
+      selectedUserId = userId;
+      const user = appData.users.find(u => u.id === userId);
+      if (!user) return;
+
+      document.getElementById("admin-home-view").classList.add("hidden");
+      document.getElementById("monthly-tips-view").classList.add("hidden");
+      document.getElementById("user-ledger-view").classList.remove("hidden");
+
+      if (currentUser.role === "admin") {
+        document.getElementById("back-home-btn").classList.remove("hidden");
+      }
+
+      document.getElementById("ledger-user-title").textContent = `السلف الشهرية — ${user.displayName}`;
+      renderUserLedger();
+    }
+
+    function renderUserLedger() {
+      const isAdmin = currentUser.role === "admin";
+      const pKey = getPeriodKey();
+      const userPeriodKey = `${selectedUserId}_${pKey}`;
+      const labels = getPeriodLabels();
+      const days = getPeriodDays();
+
+      document.getElementById("ledger-period-name").textContent = labels.title;
+      document.getElementById("ledger-period-range").textContent = labels.range;
+
+      if (!appData.advances[userPeriodKey]) appData.advances[userPeriodKey] = {};
+      const advMap = appData.advances[userPeriodKey];
+
+      const grid = document.getElementById("advances-grid");
+      grid.innerHTML = "";
+
+      days.forEach(d => {
+        const val = advMap[d.key] !== undefined && advMap[d.key] !== "" ? advMap[d.key] : "";
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.innerHTML = `
+          <span class="day-label">${d.label}</span>
+          <input type="number" class="day-input" data-date="${d.key}" value="${val}" placeholder="-" ${isAdmin ? "" : "readonly"} />
+        `;
+        grid.appendChild(cell);
+      });
+
+      const salaryInput = document.getElementById("monthly-salary-input");
+      salaryInput.value = appData.salaries[userPeriodKey] || "";
+      salaryInput.readOnly = !isAdmin;
+
+      if (isAdmin) {
+        grid.querySelectorAll(".day-input").forEach(inp => {
+          inp.addEventListener("input", () => {
+            const dKey = inp.getAttribute("data-date");
+            const num = parseFloat(inp.value);
+            if (!isNaN(num) && num !== 0) {
+              appData.advances[userPeriodKey][dKey] = num;
+            } else {
+              delete appData.advances[userPeriodKey][dKey];
+            }
+            saveData();
+            updateUserLedgerSummary();
+          });
+        });
+
+        salaryInput.oninput = () => {
+          const val = parseFloat(salaryInput.value);
+          appData.salaries[userPeriodKey] = isNaN(val) ? 0 : val;
+          saveData();
+          updateUserLedgerSummary();
+        };
+      }
+
+      attachGridArrowNavigation("advances-grid");
+      updateUserLedgerSummary();
+    }
+
+    function updateUserLedgerSummary() {
+      const pKey = getPeriodKey();
+      const userPeriodKey = `${selectedUserId}_${pKey}`;
+      const advMap = appData.advances[userPeriodKey] || {};
+
+      const totalAdv = Object.values(advMap).reduce((sum, v) => sum + (Number(v) || 0), 0);
+      const salary = Number(appData.salaries[userPeriodKey]) || 0;
+      const net = salary - totalAdv;
+
+      document.getElementById("total-advances-val").textContent = `${totalAdv} ج.م`;
+      document.getElementById("net-payout-val").textContent = `${net} ج.م`;
+
+      const advBox = document.getElementById("total-advances-box");
+      const alertBanner = document.getElementById("max-limit-alert");
+      if (totalAdv > 1000) {
+        advBox.classList.add("danger-alert");
+        alertBanner.style.display = "block";
+      } else {
+        advBox.classList.remove("danger-alert");
+        alertBanner.style.display = "none";
+      }
+    }
+
+    function openMonthlyTipsView() {
+      if (currentUser.role !== "admin") return;
+      selectedUserId = null;
+      document.getElementById("admin-home-view").classList.add("hidden");
+      document.getElementById("user-ledger-view").classList.add("hidden");
+      document.getElementById("monthly-tips-view").classList.remove("hidden");
+      document.getElementById("back-home-btn").classList.remove("hidden");
+      renderMonthlyTips();
+    }
+
+    function renderMonthlyTips() {
+      const pKey = getPeriodKey();
+      const labels = getPeriodLabels();
+      const days = getPeriodDays();
+
+      document.getElementById("tips-period-name").textContent = labels.title;
+      document.getElementById("tips-period-range").textContent = labels.range;
+
+      if (!appData.adminTips[pKey]) appData.adminTips[pKey] = {};
+      const tipsMap = appData.adminTips[pKey];
+
+      const grid = document.getElementById("tips-grid");
+      grid.innerHTML = "";
+
+      days.forEach(d => {
+        const val = tipsMap[d.key] !== undefined && tipsMap[d.key] !== "" ? tipsMap[d.key] : "";
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.innerHTML = `
+          <span class="day-label">${d.label}</span>
+          <input type="number" class="day-input" data-date="${d.key}" value="${val}" placeholder="-" />
+        `;
+        grid.appendChild(cell);
+      });
+
+      grid.querySelectorAll(".day-input").forEach(inp => {
+        inp.addEventListener("input", () => {
+          const dKey = inp.getAttribute("data-date");
+          const num = parseFloat(inp.value);
+          if (!isNaN(num) && num !== 0) {
+            appData.adminTips[pKey][dKey] = num;
+          } else {
+            delete appData.adminTips[pKey][dKey];
+          }
+          saveData();
+          updateTipsSummary();
+        });
+      });
+
+      attachGridArrowNavigation("tips-grid");
+      updateTipsSummary();
+    }
+
+    function updateTipsSummary() {
+      const { totalTips, totalAllUsersAdvances, netInstapay } = calculateCurrentMonthTotals();
+      document.getElementById("total-tips-val").textContent = `${totalTips} ج.م`;
+      document.getElementById("all-users-advances-val").textContent = `${totalAllUsersAdvances} ج.م`;
+      document.getElementById("tips-net-remaining-val").textContent = `${netInstapay} ج.م`;
+    }
+
+    function changePeriod(delta) {
+      currentPeriod.month += delta;
+      if (currentPeriod.month > 11) {
+        currentPeriod.month = 0;
+        currentPeriod.year += 1;
+      } else if (currentPeriod.month < 0) {
+        currentPeriod.month = 11;
+        currentPeriod.year -= 1;
+      }
+
+      if (!document.getElementById("user-ledger-view").classList.contains("hidden")) {
+        renderUserLedger();
+      } else if (!document.getElementById("monthly-tips-view").classList.contains("hidden")) {
+        renderMonthlyTips();
+      }
+    }
+
+    function openCreateUserModal() {
+      document.getElementById("new-display-name").value = "";
+      document.getElementById("new-username").value = "";
+      document.getElementById("new-password").value = "";
+      document.getElementById("create-user-modal").style.display = "flex";
+    }
+
+    function createUser() {
+      const displayName = document.getElementById("new-display-name").value.trim();
+      const username = document.getElementById("new-username").value.trim();
+      const password = document.getElementById("new-password").value.trim();
+
+      if (!displayName || !username || !password) return;
+      if (username === ADMIN_USER || appData.users.some(u => u.username === username)) {
+        alert("اسم المستخدم مستخدم بالفعل!");
+        return;
+      }
+
+      appData.users.push({
+        id: "u_" + Date.now(),
+        displayName,
+        username,
+        password
+      });
+      saveData();
+      closeModals();
+      renderAdminHome();
+    }
+
+    function openPasswordModal(userId) {
+      const user = appData.users.users ? null : appData.users.find(u => u.id === userId);
+      if (!user) return;
+      editingPassUserId = userId;
+      document.getElementById("pass-modal-title").textContent = `كلمة مرور: ${user.displayName}`;
+      document.getElementById("edit-username-display").value = user.username;
+      document.getElementById("edit-password-input").value = user.password;
+      document.getElementById("password-modal").style.display = "flex";
+    }
+
+    function saveUpdatedPassword() {
+      const newPass = document.getElementById("edit-password-input").value.trim();
+      if (!newPass || !editingPassUserId) return;
+      const user = appData.users.find(u => u.id === editingPassUserId);
+      if (user) {
+        user.password = newPass;
+        saveData();
+      }
+      closeModals();
+    }
+
+    function deleteUser(userId) {
+      if (!confirm("هل أنت متأكد من حذف هذا الحساب نهائياً؟")) return;
+      appData.users = appData.users.filter(u => u.id !== userId);
+      saveData();
+      renderAdminHome();
+    }
+
+    function closeModals() {
+      document.getElementById("create-user-modal").style.display = "none";
+      document.getElementById("password-modal").style.display = "none";
+      editingPassUserId = null;
+    }
+  </script>
+</body>
+</html>
