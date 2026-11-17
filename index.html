@@ -608,7 +608,7 @@
 
           <div class="stat-box">
             <label>تبسك الشهري (المبلغ اللي هيقبضه)</label>
-            <input type="number" id="monthly-salary-input" class="form-input" placeholder="0" style="font-size:18px;font-weight:800;color:var(--emerald);" />
+            <input type="number" id="monthly-salary-input" class="form-input" placeholder="0" style="font-size:18px;font-weight:800;color:var(--emerald);" readonly />
           </div>
 
           <div class="stat-box">
@@ -661,15 +661,15 @@
       </div>
       <div class="form-group">
         <label>اسم المستخدم للدخول (User Name)</label>
-        <input type="text" id="new-username" class="form-input" placeholder="مثال: ragab_1" />
+        <input type="text" id="new-username" class="form-input" placeholder="مثال: ragab_1" autocomplete="off" />
       </div>
       <div class="form-group">
         <label>كلمة المرور (Password)</label>
-        <input type="text" id="new-password" class="form-input" placeholder="كلمة المرور" />
+        <input type="text" id="new-password" class="form-input" placeholder="كلمة المرور" autocomplete="off" />
       </div>
       <div class="modal-actions">
         <button class="btn" style="flex:1;" onclick="createUser()">حفظ الحساب</button>
-        <button class="btn btn-outline" style="flex:1;" onclick="closeModals()">إلغاء</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModals()">إغلاق</button>
       </div>
     </div>
   </div>
@@ -731,7 +731,7 @@
     let selectedUserId = null;
     let editingPassUserId = null;
 
-    // التحقق المباشر من الجلسة المحفوظة مسبقاً لمنع ظهور شاشة تسجيل الدخول كل مرة
+    // فحص الجلسة المحفوظة مسبقاً وتحديث بيانات المستخدم ديناميكياً
     window.addEventListener("DOMContentLoaded", () => {
       const savedSession = localStorage.getItem("monthly_tips_session");
       if (savedSession) {
@@ -799,7 +799,8 @@
         return;
       }
 
-      const foundUser = appData.users.find(x => x.username === u && x.password === p);
+      // مطابقة بيانات الموظف بدقة تامة وبدون أي مشاكل في المسافات أو الحروف
+      const foundUser = appData.users.find(x => String(x.username).trim() === u && String(x.password).trim() === p);
       if (foundUser) {
         errEl.style.display = "none";
         triggerLoginSuccess({ role: "user", ...foundUser }, true);
@@ -813,7 +814,6 @@
       currentUser = userObj;
       currentPeriod = getInitialPeriod();
       
-      // حفظ الجلسة تلقائياً في المتصفح
       localStorage.setItem("monthly_tips_session", JSON.stringify(userObj));
 
       const loginScreen = document.getElementById("login-screen");
@@ -838,7 +838,7 @@
     function logout() {
       currentUser = null;
       selectedUserId = null;
-      localStorage.removeItem("monthly_tips_session"); // مسح الجلسة عند الخروج
+      localStorage.removeItem("monthly_tips_session");
       document.getElementById("login-user").value = "";
       document.getElementById("login-pass").value = "";
       document.getElementById("app-screen").classList.add("hidden");
@@ -900,7 +900,6 @@
       }
 
       appData.users.forEach(u => {
-        const initial = (u.displayName || u.username).charAt(0).toUpperCase();
         const card = document.createElement("div");
         card.className = "user-card";
         card.innerHTML = `
@@ -936,7 +935,7 @@
           if (targetIdx !== null && targetIdx >= 0 && targetIdx < inputs.length) {
             e.preventDefault();
             inputs[targetIdx].focus();
-            inputs[targetIdx].select();
+            if (inputs[targetIdx].select) inputs[targetIdx].select();
           }
         });
       });
@@ -944,7 +943,12 @@
 
     function openUserLedger(userId) {
       selectedUserId = userId;
-      const user = appData.users.find(u => u.id === userId);
+      // تحديث بيانات المستخدم المتاح نشطاً في الجلسة لو المدير عمل تعديل
+      if (currentUser.role === "user") {
+        selectedUserId = currentUser.id;
+      }
+
+      const user = appData.users.find(u => u.id === selectedUserId);
       if (!user) return;
 
       document.getElementById("admin-home-view").classList.add("hidden");
