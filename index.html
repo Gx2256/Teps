@@ -44,7 +44,6 @@
       -moz-appearance: textfield;
     }
 
-    /* شاشة الدخول والأنيميشن */
     #login-screen {
       display: flex;
       align-items: center;
@@ -518,7 +517,7 @@
 </head>
 <body>
 
-  <div id="login-screen">
+  <div id="login-screen" class="hidden">
     <div class="login-box" id="login-card">
       <div class="logo-badge">
         <img src="logo.jpeg" alt="Logo">
@@ -732,6 +731,30 @@
     let selectedUserId = null;
     let editingPassUserId = null;
 
+    // التحقق المباشر من الجلسة المحفوظة مسبقاً لمنع ظهور شاشة تسجيل الدخول كل مرة
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedSession = localStorage.getItem("monthly_tips_session");
+      if (savedSession) {
+        try {
+          const sessionObj = JSON.parse(savedSession);
+          if (sessionObj.role === "admin") {
+            triggerLoginSuccess({ role: "admin" }, false);
+          } else if (sessionObj.role === "user") {
+            const freshUser = appData.users.find(u => u.id === sessionObj.id);
+            if (freshUser) {
+              triggerLoginSuccess({ role: "user", ...freshUser }, false);
+            } else {
+              document.getElementById("login-screen").classList.remove("hidden");
+            }
+          }
+        } catch (e) {
+          document.getElementById("login-screen").classList.remove("hidden");
+        }
+      } else {
+        document.getElementById("login-screen").classList.remove("hidden");
+      }
+    });
+
     function getPeriodKey(p = currentPeriod) {
       return `${p.year}-${String(p.month + 1).padStart(2, '0')}`;
     }
@@ -772,37 +795,50 @@
 
       if (u === ADMIN_USER && p === ADMIN_PASS) {
         errEl.style.display = "none";
-        triggerLoginSuccess({ role: "admin" });
+        triggerLoginSuccess({ role: "admin" }, true);
         return;
       }
 
       const foundUser = appData.users.find(x => x.username === u && x.password === p);
       if (foundUser) {
         errEl.style.display = "none";
-        triggerLoginSuccess({ role: "user", ...foundUser });
+        triggerLoginSuccess({ role: "user", ...foundUser }, true);
         return;
       }
 
       errEl.style.display = "block";
     });
 
-    function triggerLoginSuccess(userObj) {
+    function triggerLoginSuccess(userObj, withAnim = true) {
       currentUser = userObj;
       currentPeriod = getInitialPeriod();
-      const card = document.getElementById("login-card");
-      card.classList.add("login-success-anim");
+      
+      // حفظ الجلسة تلقائياً في المتصفح
+      localStorage.setItem("monthly_tips_session", JSON.stringify(userObj));
 
-      setTimeout(() => {
-        document.getElementById("login-screen").classList.add("hidden");
-        card.classList.remove("login-success-anim");
-        document.getElementById("app-screen").classList.remove("hidden");
+      const loginScreen = document.getElementById("login-screen");
+      const card = document.getElementById("login-card");
+      const appScreen = document.getElementById("app-screen");
+
+      if (withAnim) {
+        card.classList.add("login-success-anim");
+        setTimeout(() => {
+          loginScreen.classList.add("hidden");
+          card.classList.remove("login-success-anim");
+          appScreen.classList.remove("hidden");
+          initAppScreen();
+        }, 450);
+      } else {
+        loginScreen.classList.add("hidden");
+        appScreen.classList.remove("hidden");
         initAppScreen();
-      }, 450);
+      }
     }
 
     function logout() {
       currentUser = null;
       selectedUserId = null;
+      localStorage.removeItem("monthly_tips_session"); // مسح الجلسة عند الخروج
       document.getElementById("login-user").value = "";
       document.getElementById("login-pass").value = "";
       document.getElementById("app-screen").classList.add("hidden");
@@ -1111,7 +1147,7 @@
     }
 
     function openPasswordModal(userId) {
-      const user = appData.users.users ? null : appData.users.find(u => u.id === userId);
+      const user = appData.users.find(u => u.id === userId);
       if (!user) return;
       editingPassUserId = userId;
       document.getElementById("pass-modal-title").textContent = `كلمة مرور: ${user.displayName}`;
